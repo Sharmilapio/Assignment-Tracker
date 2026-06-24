@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { MdFilterList, MdSearch, MdClose, MdSort } from "react-icons/md";
+import { MdFilterList, MdSearch, MdClose, MdSort, MdCalendarToday } from "react-icons/md";
 import { getSubjectStyle } from "./AssignmentForm";
 
-function FilterBar({ subjects, selected, onChange, search, onSearch, sortOrder, onSort, total, filtered }) {
+function FilterBar({ subjects, selected, onChange, search, onSearch, sortOrder, onSort, total, filtered, selectedDate }) {
   const subjectsOnly = subjects.filter((s) => s !== "All");
 
   return (
@@ -112,6 +112,22 @@ function FilterBar({ subjects, selected, onChange, search, onSearch, sortOrder, 
             : `${filtered} of ${total}`}
         </span>
       </div>
+
+      {/* Active date-filter notice */}
+      {selectedDate && (
+        <div style={{
+          padding: "7px 16px",
+          background: "linear-gradient(90deg,#fffbeb,#fef3c7)",
+          borderTop: "1px solid #fde68a",
+          display: "flex", alignItems: "center", gap: 8,
+          fontSize: 11, color: "#92400e", fontWeight: 600,
+        }}>
+          <MdCalendarToday size={13} color="#d97706" />
+          Showing assignments due on{" "}
+          <strong>{new Date(selectedDate + "T00:00:00").toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" })}</strong>
+          &nbsp;· Change date in the top bar to filter differently.
+        </div>
+      )}
 
       {/* Subject pill row */}
       {subjectsOnly.length > 0 && (

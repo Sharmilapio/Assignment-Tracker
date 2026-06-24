@@ -13,6 +13,7 @@ import AttendanceView from "./components/AttendanceView";
 import Reports from "./components/Reports";
 import Settings from "./components/Settings";
 import HelpSupport from "./components/HelpSupport";
+import { fetchAllAttendance, todayISO } from "./api";
 import "./App.css";
 
 function App() {
@@ -39,11 +40,13 @@ function App() {
   });
   const [filterSubject, setFilterSubject] = useState("All");
   const [assignmentSearch, setAssignmentSearch] = useState("");
-  const [assignmentSort, setAssignmentSort] = useState("newest"); // newest | oldest | az
+  const [assignmentSort, setAssignmentSort] = useState("newest");
   const [activeAssignmentId, setActiveAssignmentId] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [activeStudentId, setActiveStudentId] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(null); // null = today / all
+  const [allAttendance, setAllAttendance] = useState({});
 
   useEffect(() => {
     localStorage.setItem("students", JSON.stringify(students));
@@ -56,6 +59,11 @@ function App() {
   useEffect(() => {
     localStorage.setItem("subjects", JSON.stringify(availableSubjects));
   }, [availableSubjects]);
+
+  // keep allAttendance in sync so Dashboard always has fresh data
+  useEffect(() => {
+    fetchAllAttendance().then(setAllAttendance);
+  }, [selectedDate, activeTab]);
 
   const saveStudents = (names) => {
     setStudents(names.map((name, i) => ({ id: i + 1, name })));
@@ -111,11 +119,16 @@ function App() {
     ...new Set([...availableSubjects, ...assignments.map((a) => a.subject)]),
   ];
 
-  // Filter → search → sort
+  // Filter → date → search → sort
   const filteredAssignments = useMemo(() => {
     let list = filterSubject === "All"
       ? assignments
       : assignments.filter((a) => a.subject === filterSubject);
+
+    // global date filter: show only assignments due on selected date
+    if (selectedDate) {
+      list = list.filter((a) => a.dueDate === selectedDate);
+    }
 
     if (assignmentSearch.trim()) {
       const q = assignmentSearch.toLowerCase();
@@ -136,7 +149,7 @@ function App() {
     }
 
     return list;
-  }, [assignments, filterSubject, assignmentSearch, assignmentSort]);
+  }, [assignments, filterSubject, assignmentSearch, assignmentSort, selectedDate]);
 
   const activeAssignment = assignments.find((a) => a.id === activeAssignmentId);
   const activeStudent = students.find((s) => s.id === activeStudentId);
@@ -189,7 +202,7 @@ function App() {
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
         <div className={`app ${!sidebarCollapsed ? "expanded" : ""}`}>
-          <AppNavbar />
+          <AppNavbar selectedDate={selectedDate} onDateChange={setSelectedDate} />
           <AppHeader 
             activeTab={activeTab}
             onTabChange={goToTab}
@@ -211,6 +224,9 @@ function App() {
                     studentCount={students.length}
                     assignmentCount={assignments.length}
                     onTabChange={goToTab}
+                    selectedDate={selectedDate}
+                    attendance={allAttendance}
+                    assignments={assignments}
                   />
                 )}
 
@@ -229,6 +245,7 @@ function App() {
                           onSort={setAssignmentSort}
                           total={assignments.length}
                           filtered={filteredAssignments.length}
+                          selectedDate={selectedDate}
                         />
                         <AssignmentList
                           assignments={filteredAssignments}

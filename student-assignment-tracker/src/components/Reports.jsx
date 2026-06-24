@@ -1,136 +1,239 @@
-import { useState } from "react";
-import { Panel, Button } from "rsuite";
-import { MdBarChart, MdAssignment, MdCalendarToday, MdPeople, MdDownload, MdAutoAwesome } from "react-icons/md";
+import {
+  MdBarChart, MdAssignment, MdCalendarToday, MdPeople,
+  MdDownload, MdTrendingUp, MdCheckCircle, MdSchedule,
+} from "react-icons/md";
+
+const reports = [
+  {
+    Icon: MdAssignment,
+    title: "Assignment Report",
+    desc: "Summary of all assignments and submission rates per subject",
+    accent: "#3730a3",
+    bg: "#e0e7ff",
+    gradient: "linear-gradient(135deg, #f5f3ff, #ede9fe)",
+    border: "#c7d2fe",
+    tag: "Assignments",
+  },
+  {
+    Icon: MdCalendarToday,
+    title: "Attendance Report",
+    desc: "Daily and monthly attendance summary across all students",
+    accent: "#059669",
+    bg: "#d1fae5",
+    gradient: "linear-gradient(135deg, #f0fdf4, #dcfce7)",
+    border: "#a7f3d0",
+    tag: "Attendance",
+  },
+  {
+    Icon: MdPeople,
+    title: "Student Performance",
+    desc: "Individual student submission tracking and completion rates",
+    accent: "#d97706",
+    bg: "#fef3c7",
+    gradient: "linear-gradient(135deg, #fffbeb, #fef9c3)",
+    border: "#fde68a",
+    tag: "Students",
+  },
+];
+
+const quickStats = [
+  { Icon: MdTrendingUp,   label: "Reports Available", value: "3",    color: "#3730a3", bg: "#e0e7ff" },
+  { Icon: MdCheckCircle,  label: "Export Formats",    value: "PDF & CSV", color: "#059669", bg: "#d1fae5" },
+  { Icon: MdSchedule,     label: "Data Period",       value: "Current Term", color: "#d97706", bg: "#fef3c7" },
+];
 
 function Reports() {
-  const [summary, setSummary] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const reports = [
-    { icon: <MdAssignment size={26} />, title: "Assignment Report",    desc: "Summary of all assignments and submissions", color: "#e0e7ff", iconBg: "#3730a3" },
-    { icon: <MdCalendarToday size={26} />, title: "Attendance Report", desc: "Daily and monthly attendance summary",        color: "#d1fae5", iconBg: "#059669" },
-    { icon: <MdPeople size={26} />,      title: "Student Performance", desc: "Individual student submission tracking",     color: "#fef3c7", iconBg: "#d97706" },
-  ];
-
-  const generateSummary = async () => {
-    setLoading(true); setSummary("");
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6", max_tokens: 1000,
-          messages: [{ role: "user", content: `Generate a professional academic report summary for St. Joseph's College for Women, Department of Computer Science with Data Analytics. Include: assignment completion rates, attendance overview, and student performance insights. Use dummy data and make it realistic for an academic tracker. Keep it concise and professional.` }]
-        })
-      });
-      const data = await res.json();
-      setSummary(data.content[0].text);
-    } catch { setSummary("Failed to generate summary. Please try again."); }
-    setLoading(false);
-  };
-
   return (
     <div className="pg-wrapper">
+
       {/* Hero */}
-      <Panel style={{
-        background: "linear-gradient(135deg, #1e1b6e 0%, #3730a3 60%, #6366f1 100%)",
-        borderRadius: 16, padding: "40px 32px", textAlign: "center", border: "none",
-      }}>
-        <MdBarChart size={48} color="#fff" style={{ marginBottom: 12 }} />
-        <h2 style={{ color: "#fff", fontFamily: "'Poppins',sans-serif", fontSize: 26, fontWeight: 700, margin: "0 0 8px" }}>
-          Reports
-        </h2>
-        <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 14, margin: 0 }}>
-          View, download, and generate AI-powered academic reports.
-        </p>
-      </Panel>
+      <div className="page-hero">
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 14,
+            background: "rgba(255,255,255,0.15)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            border: "1px solid rgba(255,255,255,0.2)", flexShrink: 0,
+          }}>
+            <MdBarChart size={28} color="#fff" />
+          </div>
+          <div>
+            <h2 style={{
+              color: "#fff", fontFamily: "'Poppins',sans-serif",
+              fontSize: 22, fontWeight: 800, margin: "0 0 5px", letterSpacing: "-0.3px",
+            }}>
+              Reports & Analytics
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, margin: 0 }}>
+              Download academic reports for assignments, attendance and student performance
+            </p>
+          </div>
+        </div>
+
+        {/* Quick stat chips */}
+        <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
+          {quickStats.map((s) => {
+            const Icon = s.Icon;
+            return (
+              <div key={s.label} style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "8px 14px",
+                background: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.18)",
+                borderRadius: 10,
+              }}>
+                <Icon size={14} color="rgba(255,255,255,0.8)" />
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", fontWeight: 600 }}>
+                  {s.label}:
+                </span>
+                <span style={{ fontSize: 12, color: "#fff", fontWeight: 800 }}>{s.value}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Available Reports */}
-      <Panel bordered header={
-        <span style={{ fontWeight: 700, color: "#1e1b6e", fontFamily: "'Poppins',sans-serif" }}>📊 Available Reports</span>
-      } style={{ borderRadius: 16, border: "1px solid #e0e7ff", background: "#fff" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {reports.map((r, i) => (
-            <div key={i} style={{
-              display: "flex", alignItems: "center", gap: 16,
-              background: "#f5f3ff", border: `1px solid #e0e7ff`,
-              borderLeft: `4px solid ${r.iconBg}`,
-              borderRadius: 12, padding: "18px 20px",
-              transition: "transform 0.2s, box-shadow 0.2s",
-            }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 8px 24px rgba(55,48,163,0.12)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              <div style={{
-                width: 52, height: 52, borderRadius: 14,
-                background: r.color, display: "flex", alignItems: "center",
-                justifyContent: "center", color: r.iconBg, flexShrink: 0,
-              }}>
-                {r.icon}
-              </div>
-              <div style={{ flex: 1 }}>
-                <h4 style={{ fontSize: 15, color: "#1e1b6e", margin: "0 0 4px", fontWeight: 600 }}>{r.title}</h4>
-                <p style={{ fontSize: 13, color: "#6b7280", margin: 0 }}>{r.desc}</p>
-              </div>
-              <Button
-                appearance="primary"
-                startIcon={<MdDownload size={16} />}
-                style={{ background: r.iconBg, border: "none", borderRadius: 10, fontWeight: 600 }}
-              >
-                Download
-              </Button>
-            </div>
-          ))}
-        </div>
-      </Panel>
-
-      {/* AI Summary */}
-      <Panel bordered header={
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <MdAutoAwesome size={18} color="#6366f1" />
-          <span style={{ fontWeight: 700, color: "#1e1b6e", fontFamily: "'Poppins',sans-serif" }}>AI Report Summary</span>
-        </div>
-      } style={{ borderRadius: 16, border: "1px solid #e0e7ff", background: "#fff" }}>
-        <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>
-          Click below to generate an AI-powered academic performance summary.
-        </p>
-        <Button
-          appearance="primary"
-          loading={loading}
-          onClick={generateSummary}
-          startIcon={<MdAutoAwesome size={16} />}
-          style={{
-            background: "linear-gradient(135deg,#3730a3,#6366f1)",
-            border: "none", borderRadius: 10, fontWeight: 600,
-          }}
-        >
-          Generate AI Summary
-        </Button>
-        {summary && (
-          <Panel bordered style={{
-            marginTop: 16, background: "linear-gradient(135deg,#f5f3ff,#ede9fe)",
-            border: "1px solid #c4b5fd", borderRadius: 12,
-          }}>
-            <h4 style={{ fontSize: 14, fontWeight: 700, color: "#3730a3", marginBottom: 10 }}>📄 AI Generated Summary</h4>
-            <p style={{ fontSize: 13, color: "#4b5563", lineHeight: 1.7, margin: 0 }}>{summary}</p>
-          </Panel>
-        )}
-      </Panel>
-
       <div style={{
-        background: "linear-gradient(135deg,#e0e7ff,#c7d2fe)", border: "1px solid #6366f1",
-        borderRadius: 12, padding: "16px 20px", display: "flex", alignItems: "center",
-        gap: 12, fontSize: 13, color: "#3730a3",
+        background: "#fff", border: "1px solid #e0e7ff",
+        borderRadius: 16, overflow: "hidden",
+        boxShadow: "0 4px 20px rgba(55,48,163,0.07)",
       }}>
-        <span style={{ fontSize: 22 }}>📌</span>
+        <div style={{
+          padding: "16px 22px", borderBottom: "1px solid #f3f4f6",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <MdBarChart size={18} color="#6366f1" />
+            <h3 style={{
+              fontFamily: "'Poppins',sans-serif",
+              fontWeight: 700, color: "#1e1b6e", fontSize: 15, margin: 0,
+            }}>
+              Available Reports
+            </h3>
+          </div>
+          <span style={{
+            fontSize: 11, color: "#9ca3af", fontWeight: 600,
+            background: "#f3f4f6", padding: "3px 10px", borderRadius: 99,
+          }}>
+            {reports.length} reports
+          </span>
+        </div>
+
+        <div style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
+          {reports.map((r, i) => {
+            const Icon = r.Icon;
+            return (
+              <div
+                key={i}
+                style={{
+                  display: "flex", alignItems: "center", gap: 16,
+                  background: r.gradient,
+                  border: `1px solid ${r.border}`,
+                  borderLeft: `4px solid ${r.accent}`,
+                  borderRadius: 12, padding: "16px 20px",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateX(4px)";
+                  e.currentTarget.style.boxShadow = "0 6px 20px rgba(55,48,163,0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateX(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <div style={{
+                  width: 50, height: 50, borderRadius: 13,
+                  background: r.bg,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                  boxShadow: `0 4px 12px ${r.accent}22`,
+                }}>
+                  <Icon size={24} color={r.accent} />
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                    <h4 style={{
+                      fontSize: 14, color: "#1e1b6e", margin: 0,
+                      fontWeight: 700, fontFamily: "'Poppins',sans-serif",
+                    }}>
+                      {r.title}
+                    </h4>
+                    <span style={{
+                      fontSize: 10, padding: "2px 8px", borderRadius: 99,
+                      background: r.bg, color: r.accent,
+                      fontWeight: 700, border: `1px solid ${r.border}`,
+                    }}>
+                      {r.tag}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 12, color: "#6b7280", margin: 0 }}>{r.desc}</p>
+                </div>
+
+                <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                  <button
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 5,
+                      padding: "8px 14px",
+                      background: "#fff", color: r.accent,
+                      border: `1.5px solid ${r.accent}33`,
+                      borderRadius: 9, fontWeight: 700, fontSize: 12,
+                      cursor: "pointer", fontFamily: "'Poppins',sans-serif",
+                      transition: "all 0.15s", whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = r.bg;
+                      e.currentTarget.style.borderColor = r.accent;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#fff";
+                      e.currentTarget.style.borderColor = `${r.accent}33`;
+                    }}
+                  >
+                    <MdDownload size={14} /> CSV
+                  </button>
+                  <button
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 5,
+                      padding: "8px 14px",
+                      background: r.accent, color: "#fff",
+                      border: "none", borderRadius: 9,
+                      fontWeight: 700, fontSize: 12, cursor: "pointer",
+                      fontFamily: "'Poppins',sans-serif",
+                      boxShadow: `0 4px 12px ${r.accent}40`,
+                      transition: "opacity 0.15s", whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = "0.85"}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                  >
+                    <MdDownload size={14} /> PDF
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Info note */}
+      <div style={{
+        background: "linear-gradient(135deg, #e0e7ff, #c7d2fe)",
+        border: "1px solid #a5b4fc",
+        borderRadius: 12, padding: "14px 18px",
+        display: "flex", alignItems: "center", gap: 12,
+        fontSize: 13, color: "#3730a3",
+      }}>
+        <div style={{
+          width: 34, height: 34, borderRadius: 9, background: "#3730a3",
+          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+        }}>
+          <span style={{ fontSize: 16 }}>📌</span>
+        </div>
         <p style={{ margin: 0, lineHeight: 1.5 }}>
-          Reports are generated based on current data. Download them as <strong>PDF or CSV</strong> for record keeping.
+          Reports reflect <strong>current live data</strong>. Download as{" "}
+          <strong>PDF or CSV</strong> at any time for record keeping and sharing.
         </p>
       </div>
     </div>
